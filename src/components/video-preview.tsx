@@ -104,8 +104,7 @@ export function VideoPreview({ file, subpath, onClose }: VideoPreviewProps) {
 
           {/* Download */}
           <a
-            href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`}
-            download
+            href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&download=1`}
             className="absolute top-6 right-20 w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all z-10"
           >
             <Download size={18} className="text-white" />

@@ -79,8 +79,7 @@ export function ImagePreview({ file, imageFiles, subpath = "", onClose, onNaviga
 
           {/* Download */}
           <a
-            href={getDownloadUrl(file.name)}
-            download
+            href={getDownloadUrl(file.name) + "&download=1"}
             className="absolute top-6 right-20 w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all z-10"
           >
             <Download size={18} className="text-white" />

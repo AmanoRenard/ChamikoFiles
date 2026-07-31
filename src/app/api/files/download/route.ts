@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const subpath = searchParams.get("subpath") || "";
   const spaceType = searchParams.get("spaceType") || "personal";
   const spaceId = searchParams.get("spaceId") || String(user.userId);
+  const forceDownload = searchParams.get("download") === "1";
 
   const accessCheck = checkSpaceAccess(spaceType, spaceId, user.userId);
   if (!accessCheck.allowed) {
@@ -94,8 +95,10 @@ export async function GET(request: NextRequest) {
   const fileBuffer = fs.readFileSync(filePath);
   return new NextResponse(fileBuffer, {
     headers: {
-      "Content-Type": contentType,
-      "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      "Content-Type": forceDownload ? "application/octet-stream" : contentType,
+      "Content-Disposition": forceDownload
+        ? `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`
+        : `inline; filename*=UTF-8''${encodeURIComponent(filename)}`,
       "Content-Length": String(fileSize),
       "Accept-Ranges": "bytes",
     },

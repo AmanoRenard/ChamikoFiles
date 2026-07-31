@@ -1,16 +1,30 @@
 import { FileInfo } from "@/types";
 import { getFileExtension, isImageFile, getMimeType, isVideoFile, isAudioFile, isTextFile, isDocumentFile } from "@/lib/file-utils";
+import { readConfig } from "@/lib/config";
 import fs from "fs";
 import path from "path";
 
 // ============ Space path resolution ============
 
-const STORAGE_BASE = path.resolve(process.cwd(), "data", "storage_base");
+/**
+ * Dynamically read storage base path from config.ini.
+ * Uses the configured storage.path, resolved relative to project root.
+ * Falls back to "uploads" if not configured.
+ */
+export function getStorageBase(): string {
+  const config = readConfig();
+  const configuredPath = config.storage.path || "";
+  // Empty or relative path defaults to uploads
+  if (!configuredPath || !path.isAbsolute(configuredPath)) {
+    return path.resolve(process.cwd(), "uploads");
+  }
+  return configuredPath;
+}
 
 /**
  * Resolve the physical path for a space+subpath combination.
- * Personal space: data/storage_base/_user_directory/{userId}/{subpath}
- * Shared space:  data/storage_base/_shared_directory/{spaceId}/{subpath}
+ * Personal space: {storage_base}/_user_directory/{userId}/{subpath}
+ * Shared space:  {storage_base}/_shared_directory/{spaceId}/{subpath}
  */
 export function resolveSpacePath(
   spaceType: string,
@@ -19,7 +33,7 @@ export function resolveSpacePath(
 ): string {
   const dirName =
     spaceType === "personal" ? "_user_directory" : "_shared_directory";
-  const baseDir = path.join(STORAGE_BASE, dirName, spaceId);
+  const baseDir = path.join(getStorageBase(), dirName, spaceId);
   return safeResolvePath(baseDir, subpath);
 }
 
@@ -29,7 +43,7 @@ export function resolveSpacePath(
 export function ensureSpaceDirectory(spaceType: string, spaceId: string): void {
   const dirName =
     spaceType === "personal" ? "_user_directory" : "_shared_directory";
-  const dir = path.join(STORAGE_BASE, dirName, spaceId);
+  const dir = path.join(getStorageBase(), dirName, spaceId);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -44,7 +58,7 @@ export function getSpaceStorageSize(
 ): { usedSpace: number; fileCount: number } {
   const dirName =
     spaceType === "personal" ? "_user_directory" : "_shared_directory";
-  const dir = path.join(STORAGE_BASE, dirName, spaceId);
+  const dir = path.join(getStorageBase(), dirName, spaceId);
   if (!fs.existsSync(dir)) return { usedSpace: 0, fileCount: 0 };
   return getTotalStorageSize(dir);
 }
@@ -55,7 +69,7 @@ export function getSpaceStorageSize(
 export function deleteSpaceDirectory(spaceType: string, spaceId: string): void {
   const dirName =
     spaceType === "personal" ? "_user_directory" : "_shared_directory";
-  const dir = path.join(STORAGE_BASE, dirName, spaceId);
+  const dir = path.join(getStorageBase(), dirName, spaceId);
   if (fs.existsSync(dir)) {
     recursiveDeleteFolder(dir);
   }

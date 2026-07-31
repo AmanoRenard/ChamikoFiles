@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { FileInfo, FileListResponse, UploadProgress } from "@/types";
 import { FileCard } from "@/components/file-card";
 import { FileRow } from "@/components/file-row";
@@ -24,7 +25,7 @@ import { SpaceSelector } from "@/components/space-selector";
 import { useSpaces } from "@/hooks/use-spaces";
 import { readConfig } from "@/lib/config";
 import { AnimatePresence, motion } from "framer-motion";
-import { FolderOpen, ChevronLeft, ChevronRight, X, Loader2, LogIn, Upload } from "lucide-react";
+import { FolderOpen, ChevronLeft, ChevronRight, X, Loader2, LogIn, Upload, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -74,6 +75,9 @@ export default function HomePage() {
   const [contextMenu, setContextMenu] = useState<{
     x: number; y: number; file: FileInfo;
   } | null>(null);
+
+  const [batchActionMenuOpen, setBatchActionMenuOpen] = useState(false);
+  const batchActionBtnRef = useRef<HTMLButtonElement>(null);
 
   const [uploadProgressItems, setUploadProgressItems] = useState<UploadProgress[]>([]);
   const xhrRefs = useRef<Map<string, XMLHttpRequest>>(new Map());
@@ -134,6 +138,13 @@ export default function HomePage() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [renameTarget, moveTarget, batchMoveOpen, batchRenameOpen, batchDeleteConfirm, deleteTarget]);
+
+  // Close batch action menu when selection clears
+  useEffect(() => {
+    if (selectedItems.size === 0) {
+      setBatchActionMenuOpen(false);
+    }
+  }, [selectedItems.size]);
 
   // Restore preferences
   const [prefsLoaded, setPrefsLoaded] = useState(false);
@@ -458,8 +469,22 @@ export default function HomePage() {
     [currentPath, currentSpaceType, currentSpaceId, addToast, fetchFiles]
   );
 
+  const downloadUrl = useCallback(
+    (name: string) =>
+      `/api/files/download?name=${encodeURIComponent(name)}&subpath=${encodeURIComponent(currentPath)}&${spaceParams}&download=1`,
+    [currentPath, spaceParams]
+  );
+
   // Batch download
   const handleBatchDownload = useCallback(async () => {
+    if (selectedItems.size === 0) return;
+    // Single file: direct download, no zip
+    if (selectedItems.size === 1) {
+      const name = Array.from(selectedItems)[0];
+      window.open(downloadUrl(name), "_blank");
+      setSelectedItems(new Set());
+      return;
+    }
     const res = await fetch("/api/files/batch-download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -485,7 +510,7 @@ export default function HomePage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setSelectedItems(new Set());
-  }, [selectedItems, currentPath, currentSpaceType, currentSpaceId, addToast]);
+  }, [selectedItems, currentPath, currentSpaceType, currentSpaceId, addToast, downloadUrl]);
 
   // Preview
   const previewFileRef = useRef<FileInfo | null>(null);
@@ -555,12 +580,6 @@ export default function HomePage() {
 
   const imageFiles = useMemo(() => files.filter((f) => f.isImage), [files]);
 
-  const downloadUrl = useCallback(
-    (name: string) =>
-      `/api/files/download?name=${encodeURIComponent(name)}&subpath=${encodeURIComponent(currentPath)}&${spaceParams}`,
-    [currentPath, spaceParams]
-  );
-
   // Auth loading
   if (authLoading) {
     return (
@@ -624,42 +643,44 @@ export default function HomePage() {
           </AnimatePresence>
 
           {/* Breadcrumb + Toolbar — unified glass background */}
-          <div className="sm:sticky sm:top-0 z-40 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 pt-1.5 sm:pt-3 pb-2 sm:pb-2 mb-3 sm:mb-5 bg-surface-dark/80 backdrop-blur-xl border-b border-white/[0.06]">
-            {/* Breadcrumb + Space selector (mobile) */}
-            <div className="flex items-center gap-3">
-              <div className="lg:hidden">
-                <SpaceSelector
-                  spaces={spaces}
-                  currentSpace={currentSpace}
-                  currentSpaceId={currentSpaceId}
-                  currentSpaceType={currentSpaceType}
-                  onSwitchSpace={switchToSpace}
-                  onSpaceUpdated={fetchSpaces}
+          <div className="sm:sticky sm:top-0 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 pt-2 sm:pt-3 pb-2 sm:pb-2.5 mb-3 sm:mb-5 bg-surface-dark/95 border-b border-white/[0.06]">
+            <div className="space-y-1.5">
+              {/* Breadcrumb + Space selector (mobile) */}
+              <div className="flex items-center gap-3">
+                <div className="lg:hidden">
+                  <SpaceSelector
+                    spaces={spaces}
+                    currentSpace={currentSpace}
+                    currentSpaceId={currentSpaceId}
+                    currentSpaceType={currentSpaceType}
+                    onSwitchSpace={switchToSpace}
+                    onSpaceUpdated={fetchSpaces}
+                  />
+                </div>
+                <Breadcrumb
+                  path={currentPath}
+                  onNavigate={navigateToPath}
+                  spaceName={currentSpace?.name || "根目录"}
                 />
               </div>
-              <Breadcrumb
-                path={currentPath}
-                onNavigate={navigateToPath}
-                spaceName={currentSpace?.name || "根目录"}
-              />
-            </div>
 
-            {/* Toolbar */}
-            <div className="flex items-center gap-2.5 flex-wrap mt-1.5 sm:mt-2">
-              <SearchBar
-                onSearch={setSearchQuery}
-                onSortChange={(by, order) => { setSortBy(by); setSortOrder(order); }}
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onCreateFolder={handleCreateFolder}
-                onSelectAll={handleSelectAll}
-                filterType={filterType}
-                onFilterChange={setFilterType}
-                onUpload={(fileList) => { handleUpload(Array.from(fileList)); }}
-                loaded={prefsLoaded}
-              />
-              <ViewToggle viewMode={viewMode} onChange={setViewMode} loaded={prefsLoaded} />
-              <span className="text-xs text-slate-500 ml-auto hidden sm:block">共 {total} 项</span>
+              {/* Toolbar */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <SearchBar
+                  onSearch={setSearchQuery}
+                  onSortChange={(by, order) => { setSortBy(by); setSortOrder(order); }}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onCreateFolder={handleCreateFolder}
+                  onSelectAll={handleSelectAll}
+                  filterType={filterType}
+                  onFilterChange={setFilterType}
+                  onUpload={(fileList) => { handleUpload(Array.from(fileList)); }}
+                  loaded={prefsLoaded}
+                />
+                <ViewToggle viewMode={viewMode} onChange={setViewMode} loaded={prefsLoaded} />
+                <span className="text-xs text-slate-500 ml-auto hidden sm:block">共 {total} 项</span>
+              </div>
             </div>
           </div>
 
@@ -694,7 +715,7 @@ export default function HomePage() {
               </div>
             </div>
           ) : displayFiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20">
+            <div className="flex flex-col items-center justify-center py-20 select-none">
               <div className="w-20 h-20 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mb-4">
                 <FolderOpen size={36} className="text-slate-600" />
               </div>
@@ -760,8 +781,18 @@ export default function HomePage() {
           <AnimatePresence>
             {isSelectMode && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50">
-                <div className="glass-card px-5 py-3 flex items-center gap-4 shadow-2xl border border-white/[0.08]">
+                <div className="glass-card px-5 py-3 flex items-center gap-3 shadow-2xl border border-white/[0.08]">
                   <span className="text-sm text-slate-300">已选择 <span className="text-primary-light font-semibold">{selectedItems.size}</span> 项</span>
+                  <div className="relative">
+                    <button
+                      ref={batchActionBtnRef}
+                      onClick={() => setBatchActionMenuOpen(!batchActionMenuOpen)}
+                      className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center hover:bg-primary/25 transition-all"
+                      title="批量操作"
+                    >
+                      <MoreHorizontal size={15} className="text-primary-light" />
+                    </button>
+                  </div>
                   <button onClick={() => { setSelectedItems(new Set()); }} className="w-7 h-7 rounded-lg hover:bg-white/[0.04] flex items-center justify-center transition-all">
                     <X size={14} className="text-slate-500" />
                   </button>
@@ -782,7 +813,7 @@ export default function HomePage() {
             <ContextMenu
               x={contextMenu.x} y={contextMenu.y}
               items={
-                selectedItems.size >= 2
+                selectedItems.has(contextMenu.file.name) && selectedItems.size >= 2
                   ? getBatchContextMenuItems({
                       onBatchDownload: handleBatchDownload,
                       onBatchMove: () => { setBatchMoveOpen(true); },
@@ -828,6 +859,71 @@ export default function HomePage() {
           </motion.button>
         </div>
       </div>
+
+      {/* Batch action menu — portal to body to escape stacking context */}
+      {batchActionMenuOpen && batchActionBtnRef.current && typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-[9998]" onClick={() => setBatchActionMenuOpen(false)} />
+            <div
+              className="fixed z-[9999] w-36 py-1.5 rounded-xl bg-[#1A1530] border border-white/[0.1] shadow-2xl"
+              style={{
+                left: batchActionBtnRef.current.getBoundingClientRect().right - 144,
+                top: batchActionBtnRef.current.getBoundingClientRect().top - 8,
+                transform: "translateY(-100%)",
+              }}
+            >
+              <button
+                onClick={() => { handleBatchDownload(); setBatchActionMenuOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:bg-white/[0.04] transition-all"
+              >
+                下载
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedItems.size === 1) {
+                    const f = displayFiles.find((x) => x.name === Array.from(selectedItems)[0]);
+                    if (f) setMoveTarget(f);
+                  } else {
+                    setBatchMoveOpen(true);
+                  }
+                  setBatchActionMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:bg-white/[0.04] transition-all"
+              >
+                移动
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedItems.size === 1) {
+                    const f = displayFiles.find((x) => x.name === Array.from(selectedItems)[0]);
+                    if (f) { setRenameTarget(f); setRenameName(f.name); }
+                  } else {
+                    setBatchRenameOpen(true);
+                  }
+                  setBatchActionMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:bg-white/[0.04] transition-all"
+              >
+                重命名
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedItems.size === 1) {
+                    setDeleteTarget(Array.from(selectedItems)[0]);
+                  } else {
+                    setBatchDeleteConfirm(true);
+                  }
+                  setBatchActionMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-all"
+              >
+                删除
+              </button>
+            </div>
+          </>,
+          document.body
+        )}
     </div>
   );
 }

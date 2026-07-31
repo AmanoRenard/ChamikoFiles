@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readConfig } from "@/lib/config";
-import { safeResolvePath } from "@/lib/file-utils-server";
+import { getStorageBase, safeResolvePath } from "@/lib/file-utils-server";
 import fs from "fs";
 import path from "path";
 
 // GET: 列出所有文件夹（用于移动时选择目标）
 export async function GET(request: NextRequest) {
-  const config = readConfig();
+  const storageBase = getStorageBase();
   const { searchParams } = new URL(request.url);
   const parentPath = searchParams.get("path") || "";
 
   let currentDir: string;
   try {
-    currentDir = safeResolvePath(config.storage.path, parentPath);
+    currentDir = safeResolvePath(storageBase, parentPath);
   } catch {
     return NextResponse.json({ success: false, error: "非法路径" }, { status: 403 });
   }

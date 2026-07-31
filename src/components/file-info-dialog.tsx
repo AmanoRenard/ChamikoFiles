@@ -30,7 +30,7 @@ export function FileInfoDialog({ file, subpath, onClose }: FileInfoDialogProps) 
   }, [file]);
 
   const downloadUrl = file
-    ? `/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`
+    ? `/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&download=1`
     : "";
 
   const iconType = file ? getFileTypeIcon(file.ext.toLowerCase()) : "file";

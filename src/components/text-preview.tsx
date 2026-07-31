@@ -117,8 +117,7 @@ export function TextPreview({ file, subpath, onClose }: TextPreviewProps) {
                   )}
                 </button>
                 <a
-                  href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`}
-                  download
+                  href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&download=1`}
                   className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
                   title="下载"
                 >

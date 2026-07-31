@@ -114,8 +114,7 @@ export function AudioPreview({ file, subpath, onClose }: AudioPreviewProps) {
 
           {/* Download button */}
           <a
-            href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`}
-            download={file.name}
+            href={`/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&download=1`}
             className="mt-5 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-slate-400 hover:text-slate-200 hover:bg-white/[0.08] transition-all"
           >
             <Download size={15} />

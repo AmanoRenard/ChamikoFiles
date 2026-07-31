@@ -47,7 +47,7 @@ function serializeIni(data: Record<string, Record<string, string>>): string {
 function getDefaultConfig(): AppConfig {
   return {
     storage: {
-      path: "C:\\Users\\Chamiko\\Downloads\\隔空投送",
+      path: "uploads",
       maxSpace: 10737418240,
       allowedTypes: "",
     },
@@ -76,7 +76,7 @@ export function readConfig(): AppConfig {
 
     return {
       storage: {
-        path: parsed.storage?.path || defaultConfig.storage.path,
+        path: parsed.storage?.path || "",
         maxSpace: parseInt(parsed.storage?.maxSpace || String(defaultConfig.storage.maxSpace), 10),
         allowedTypes: parsed.storage?.allowedTypes || defaultConfig.storage.allowedTypes,
       },
