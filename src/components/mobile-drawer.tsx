@@ -33,9 +33,16 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
   useEffect(() => {
     if (!open || !user) return;
     const fetchStorage = async () => {
-      const res = await fetch("/api/storage");
-      const data = await res.json();
-      if (data.success) setStats(data.data);
+      try {
+        const res = await fetch("/api/storage", { credentials: "include" });
+        if (!res.ok) return;
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) return;
+        const data = await res.json();
+        if (data.success) setStats(data.data);
+      } catch {
+        // 请求失败或响应非 JSON，静默忽略
+      }
     };
     fetchStorage();
   }, [open, user]);

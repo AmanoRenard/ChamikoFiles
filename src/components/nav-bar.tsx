@@ -18,10 +18,18 @@ export function NavBar() {
 
   useEffect(() => {
     const fetchStorage = async () => {
-      const res = await fetch("/api/storage");
-      const data = await res.json();
-      if (data.success) {
-        setStats(data.data);
+      try {
+        const res = await fetch("/api/storage", { credentials: "include" });
+        if (!res.ok) return;
+        // 检查 Content-Type 防止把 HTML 登录页当 JSON 解析
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) return;
+        const data = await res.json();
+        if (data.success) {
+          setStats(data.data);
+        }
+      } catch {
+        // 请求失败或响应非 JSON，静默忽略
       }
     };
     fetchStorage();

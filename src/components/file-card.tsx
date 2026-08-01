@@ -56,6 +56,7 @@ function FileCardRaw({
   };
 
   const downloadUrl = `/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`;
+  const thumbnailUrl = `/api/files/thumbnail?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&size=card`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (wasDrag(e)) return;
@@ -136,7 +137,7 @@ function FileCardRaw({
           </div>
         ) : file.isImage ? (
           <img
-            src={downloadUrl}
+            src={thumbnailUrl}
             alt={file.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"

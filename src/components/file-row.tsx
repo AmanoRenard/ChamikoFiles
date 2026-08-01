@@ -56,6 +56,7 @@ function FileRowRaw({
   };
 
   const downloadUrl = `/api/files/download?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}`;
+  const thumbnailUrl = `/api/files/thumbnail?name=${encodeURIComponent(file.name)}&subpath=${encodeURIComponent(subpath)}&size=row`;
 
   const handleIconClick = (e: React.MouseEvent) => {
     if (wasDrag(e)) return;
@@ -133,7 +134,7 @@ function FileRowRaw({
           </div>
         ) : file.isImage ? (
           <img
-            src={downloadUrl}
+            src={thumbnailUrl}
             alt={file.name}
             className="w-10 h-10 rounded-xl object-cover flex-shrink-0 transition-transform duration-300 hover:scale-110"
             draggable={false}

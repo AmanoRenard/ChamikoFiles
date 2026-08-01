@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveSpacePath, recursiveDeleteFolder } from "@/lib/file-utils-server";
 import { requireAuth, authError } from "@/lib/auth";
 import { checkSpaceAccess } from "@/lib/spaces";
+import { clearThumbnailCache, clearThumbnailCacheRecursive } from "@/lib/thumbnail-utils";
 import fs from "fs";
 import path from "path";
 
@@ -44,8 +45,10 @@ export async function DELETE(request: NextRequest) {
 
   const stat = fs.statSync(filePath);
   if (stat.isDirectory()) {
+    clearThumbnailCacheRecursive(filePath);
     recursiveDeleteFolder(filePath);
   } else {
+    clearThumbnailCache(filePath);
     fs.unlinkSync(filePath);
   }
 
@@ -100,8 +103,10 @@ export async function POST(request: NextRequest) {
     try {
       const stat = fs.statSync(itemPath);
       if (stat.isDirectory()) {
+        clearThumbnailCacheRecursive(itemPath);
         recursiveDeleteFolder(itemPath);
       } else {
+        clearThumbnailCache(itemPath);
         fs.unlinkSync(itemPath);
       }
       deleted.push(item);

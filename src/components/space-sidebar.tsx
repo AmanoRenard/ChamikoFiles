@@ -116,17 +116,28 @@ export function SpaceSidebar({
 
                 {/* Settings menu button (only for owner of shared spaces) */}
                 {!isPersonal && space.role === "owner" && (
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
                       const rect = e.currentTarget.getBoundingClientRect();
                       setMenuAnchor({ x: rect.right, y: rect.top });
                       setMenuTarget(space);
                     }}
-                    className="w-6 h-6 rounded-md hover:bg-white/[0.08] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setMenuAnchor({ x: rect.right, y: rect.top });
+                        setMenuTarget(space);
+                      }
+                    }}
+                    className="w-6 h-6 rounded-md hover:bg-white/[0.08] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                   >
                     <MoreHorizontal size={12} className="text-slate-500" />
-                  </button>
+                  </div>
                 )}
               </motion.button>
             );
