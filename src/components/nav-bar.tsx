@@ -17,7 +17,7 @@ export function NavBar() {
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const userAreaRef = useRef<HTMLDivElement>(null);
+  const userAreaRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchStorage = async () => {

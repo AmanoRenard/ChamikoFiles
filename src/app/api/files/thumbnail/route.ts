@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
   try {
     const { buffer, fromCache } = await getOrGenerateThumbnail(filePath, width);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "image/webp",
         "Content-Length": String(buffer.length),

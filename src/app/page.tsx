@@ -632,7 +632,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="px-3 sm:px-6 lg:px-8 pb-3 sm:pb-5">
+        <div className="px-3 sm:px-6 lg:px-8 pb-3 sm:pb-5 flex flex-col min-h-full">
           {/* Upload progress */}
           <AnimatePresence>
             {uploadProgressItems.length > 0 && (
@@ -709,13 +709,10 @@ export default function HomePage() {
           {/* File list */}
           {loading ? (
             <div className="flex-1 flex items-center justify-center min-h-[300px]">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                <p className="text-sm text-slate-500">加载中...</p>
-              </div>
+              <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
           ) : displayFiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 select-none">
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[300px] select-none">
               <div className="w-20 h-20 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mb-4">
                 <FolderOpen size={36} className="text-slate-600" />
               </div>

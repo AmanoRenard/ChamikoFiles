@@ -19,7 +19,7 @@ import { useToast } from "@/components/toast-provider";
 interface UserProfilePopupProps {
   open: boolean;
   onClose: () => void;
-  anchorRef: React.RefObject<HTMLDivElement | null>;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 export function UserProfilePopup({
