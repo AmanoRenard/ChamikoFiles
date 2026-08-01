@@ -15,6 +15,8 @@ export async function GET() {
     data: {
       id: user.userId,
       username: user.username,
+      nickname: user.nickname || user.username,
+      avatar: user.avatar || null,
       isAdmin: user.isAdmin,
     },
   });

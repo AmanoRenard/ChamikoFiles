@@ -92,12 +92,20 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
                 {/* User info */}
                 {user && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center flex-shrink-0">
-                      <User size={20} className={user.isAdmin ? "text-primary-light" : "text-slate-400"} />
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {user.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={user.nickname || user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User size={20} className={user.isAdmin ? "text-primary-light" : "text-slate-400"} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-200 truncate">
-                        {user.username}
+                        {user.nickname || user.username}
                       </p>
                       <p className="text-[11px] text-slate-500">
                         {user.isAdmin ? "管理员" : "用户"}

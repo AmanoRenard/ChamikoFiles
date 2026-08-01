@@ -39,6 +39,8 @@ export interface TokenPayload {
   userId: number;
   username: string;
   isAdmin: boolean;
+  nickname?: string;
+  avatar?: string | null;
 }
 
 export async function signToken(payload: TokenPayload): Promise<string> {
@@ -97,7 +99,20 @@ export async function getTokenFromCookie(): Promise<string | null> {
 export async function getCurrentUser(): Promise<TokenPayload | null> {
   const token = await getTokenFromCookie();
   if (!token) return null;
-  return verifyToken(token);
+  const payload = await verifyToken(token);
+  if (!payload) return null;
+
+  // Fetch full user info from DB (includes nickname, avatar)
+  const dbUser = db.findUserById(payload.userId);
+  if (!dbUser) return null;
+
+  return {
+    userId: dbUser.id,
+    username: dbUser.username,
+    isAdmin: dbUser.isAdmin,
+    nickname: dbUser.nickname,
+    avatar: dbUser.avatar,
+  };
 }
 
 export async function requireAuth(): Promise<TokenPayload> {

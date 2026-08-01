@@ -144,6 +144,8 @@ export interface FolderItem {
 export interface User {
   id: number;
   username: string;
+  nickname: string;
+  avatar: string | null;
   isAdmin: boolean;
   createdAt: string;
   lastLogin: string | null;
@@ -170,6 +172,7 @@ export interface LoginRequest {
 // 注册请求
 export interface RegisterRequest {
   username: string;
+  nickname: string;
   password: string;
   invitationCode?: string;
 }
@@ -178,6 +181,8 @@ export interface RegisterRequest {
 export interface AuthUser {
   id: number;
   username: string;
+  nickname: string;
+  avatar: string | null;
   isAdmin: boolean;
   createdAt: string;
 }

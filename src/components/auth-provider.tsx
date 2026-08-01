@@ -16,8 +16,9 @@ interface AuthContextValue {
   loading: boolean;
   needsSetup: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (username: string, password: string, invitationCode?: string) => Promise<{ success: boolean; error?: string }>;
+  register: (username: string, password: string, nickname: string, invitationCode?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -66,11 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (username: string, password: string, invitationCode?: string) => {
+    async (username: string, password: string, nickname: string, invitationCode?: string) => {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, invitationCode }),
+        body: JSON.stringify({ username, password, nickname, invitationCode }),
       });
       const data: ApiResponse<AuthUser> = await res.json();
       if (data.success && data.data) {
@@ -87,9 +88,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const meRes = await fetch("/api/auth/me");
+    const meData: ApiResponse<AuthUser> = await meRes.json();
+    if (meData.success && meData.data) {
+      setUser(meData.data);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, needsSetup, login, register, logout }}
+      value={{ user, loading, needsSetup, login, register, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

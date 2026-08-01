@@ -8,16 +8,26 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  KeyRound,
   Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
 
+/** 密码需至少8位，且至少包含字母、数字、特殊字符中的两种 */
+function isPasswordValid(pwd: string): boolean {
+  if (pwd.length < 8) return false;
+  const hasLetter = /[a-zA-Z]/.test(pwd);
+  const hasDigit = /[0-9]/.test(pwd);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{}|;:'",.<>?/\\`~]/.test(pwd);
+  const categories = [hasLetter, hasDigit, hasSpecial].filter(Boolean).length;
+  return categories >= 2;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const { register, user, loading: authLoading } = useAuth();
   const [username, setUsername] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [invitationCode, setInvitationCode] = useState("");
@@ -45,7 +55,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!username.trim() || !password) {
+    if (!username.trim() || !password || !nickname.trim()) {
       setError("请填写所有必填字段");
       return;
     }
@@ -53,8 +63,16 @@ export default function RegisterPage() {
       setError("用户名至少需要 2 个字符");
       return;
     }
-    if (password.length < 6) {
-      setError("密码至少需要 6 个字符");
+    if (nickname.trim().length < 1 || nickname.trim().length > 32) {
+      setError("昵称需要 1-32 个字符");
+      return;
+    }
+    if (password.length < 8) {
+      setError("密码至少需要 8 个字符");
+      return;
+    }
+    if (!isPasswordValid(password)) {
+      setError("密码需至少8位，且至少包含字母、数字、特殊字符中的两种");
       return;
     }
     if (password !== confirmPassword) {
@@ -70,6 +88,7 @@ export default function RegisterPage() {
     const result = await register(
       username.trim(),
       password,
+      nickname.trim(),
       needsSetup ? undefined : invitationCode.trim()
     );
     setSubmitting(false);
@@ -130,15 +149,6 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {needsSetup === false && (
-            <div className="flex items-start gap-2.5 mb-5 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <KeyRound size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-300/80 leading-relaxed">
-                注册需要邀请码。请联系管理员获取有效的邀请码。邀请码有效期 24 小时且仅能使用一次。
-              </p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div>
@@ -155,6 +165,21 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Nickname */}
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                昵称
+              </label>
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="输入显示昵称"
+                autoComplete="nickname"
+                className="w-full h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all"
+              />
+            </div>
+
             {/* Password */}
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">
@@ -165,9 +190,14 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="至少 6 个字符"
+                  placeholder="至少 8 个字符"
                   autoComplete="new-password"
-                  className="w-full h-11 px-4 pr-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full h-11 px-4 pr-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
+                  style={
+                    {
+                      WebkitTextSecurity: showPassword ? "none" : undefined,
+                    } as React.CSSProperties
+                  }
                 />
                 <button
                   type="button"

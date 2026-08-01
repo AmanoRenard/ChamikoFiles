@@ -82,7 +82,8 @@ export const db = {
   createUser(
     username: string,
     passwordHash: string,
-    isAdmin: boolean
+    isAdmin: boolean,
+    nickname?: string
   ): User {
     const users = loadUsers();
     const id = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
@@ -91,6 +92,8 @@ export const db = {
     const newUser: StoredUser = {
       id,
       username,
+      nickname: nickname || username,
+      avatar: null,
       passwordHash,
       isAdmin,
       createdAt: now,
@@ -111,6 +114,26 @@ export const db = {
       users[idx].lastLogin = new Date().toISOString();
       saveUsers(users);
     }
+  },
+
+  updateUser(
+    userId: number,
+    updates: Partial<Pick<User, "nickname" | "avatar">>
+  ): User | null {
+    const users = loadUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) return null;
+
+    if (updates.nickname !== undefined) {
+      users[idx].nickname = updates.nickname;
+    }
+    if (updates.avatar !== undefined) {
+      users[idx].avatar = updates.avatar;
+    }
+    saveUsers(users);
+
+    const { passwordHash: _, ...safe } = users[idx];
+    return safe;
   },
 
   listUsers(): User[] {

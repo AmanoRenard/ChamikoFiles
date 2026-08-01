@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
     data: {
       id: storedUser.id,
       username: storedUser.username,
+      nickname: storedUser.nickname || storedUser.username,
+      avatar: storedUser.avatar || null,
       isAdmin: storedUser.isAdmin,
       createdAt: storedUser.createdAt,
     },

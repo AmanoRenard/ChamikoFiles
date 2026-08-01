@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Cloud, Settings, LogOut, Shield, User, Menu } from "lucide-react";
+import { Cloud, Settings, Shield, User, Menu } from "lucide-react";
 import { StorageRing } from "./storage-ring";
 import { MobileDrawer } from "./mobile-drawer";
+import { UserProfilePopup } from "./user-profile-popup";
 import { formatFileSize } from "@/lib/file-utils";
 import { StorageStats } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 
 export function NavBar() {
   const router = useRouter();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const userAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchStorage = async () => {
@@ -36,11 +39,6 @@ export function NavBar() {
     const interval = setInterval(fetchStorage, 10000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
 
   const isAuthPage =
     typeof window !== "undefined" &&
@@ -93,23 +91,34 @@ export function NavBar() {
                   )}
 
                   {/* User avatar + name */}
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
-                    <div className="w-6 h-6 rounded-md bg-white/[0.06] flex items-center justify-center">
-                      <User size={12} className={user.isAdmin ? "text-primary-light" : "text-slate-400"} />
-                    </div>
-                    <span className="text-xs text-slate-300 max-w-[80px] truncate">
-                      {user.username}
-                    </span>
-                  </div>
+                  <div className="relative">
+                    <button
+                      ref={userAreaRef}
+                      onClick={() => setProfileOpen(!profileOpen)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.04] hover:bg-white/[0.06] hover:border-white/[0.08] transition-all cursor-pointer"
+                    >
+                      <div className="w-6 h-6 rounded-md bg-white/[0.06] flex items-center justify-center overflow-hidden">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.nickname || user.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User size={12} className={user.isAdmin ? "text-primary-light" : "text-slate-400"} />
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-300 max-w-[80px] truncate">
+                        {user.nickname || user.username}
+                      </span>
+                    </button>
 
-                  {/* Logout */}
-                  <button
-                    onClick={handleLogout}
-                    className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center hover:bg-red-500/10 hover:border-red-500/20 transition-all group"
-                    title="退出登录"
-                  >
-                    <LogOut size={14} className="text-slate-400 group-hover:text-red-400 transition-colors" />
-                  </button>
+                    <UserProfilePopup
+                      open={profileOpen}
+                      onClose={() => setProfileOpen(false)}
+                      anchorRef={userAreaRef}
+                    />
+                  </div>
                 </>
               )}
 
