@@ -41,6 +41,7 @@ export interface TokenPayload {
   isAdmin: boolean;
   nickname?: string;
   avatar?: string | null;
+  createdAt?: string;
 }
 
 export async function signToken(payload: TokenPayload): Promise<string> {
@@ -112,6 +113,7 @@ export async function getCurrentUser(): Promise<TokenPayload | null> {
     isAdmin: dbUser.isAdmin,
     nickname: dbUser.nickname,
     avatar: dbUser.avatar,
+    createdAt: dbUser.createdAt,
   };
 }
 

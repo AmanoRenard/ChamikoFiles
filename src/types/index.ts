@@ -31,6 +31,22 @@ export interface AppConfig {
     defaultSharedQuota: number;
     maxSharedSpaces: number;
   };
+  site: {
+    name: string;
+    description: string;
+  };
+  upload: {
+    maxFileSize: number;
+    maxFilesPerBatch: number;
+  };
+  security: {
+    maxLoginAttempts: number;
+    lockoutMinutes: number;
+    sessionTimeoutHours: number;
+  };
+  notification: {
+    storageAlertPercent: number;
+  };
 }
 
 // 存储统计类型

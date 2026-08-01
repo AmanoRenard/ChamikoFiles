@@ -20,6 +20,12 @@ export function useSpaces() {
     setError(null);
     try {
       const res = await fetch("/api/spaces");
+      // 401 means not authenticated — don't treat as error, just leave spaces empty
+      if (res.status === 401) {
+        setSpaces([]);
+        setLoading(false);
+        return;
+      }
       const data: ApiResponse<SpaceSummary[]> = await res.json();
       if (data.success && data.data) {
         setSpaces(data.data);

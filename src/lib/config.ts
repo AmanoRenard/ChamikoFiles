@@ -61,7 +61,30 @@ function getDefaultConfig(): AppConfig {
       defaultSharedQuota: -1,
       maxSharedSpaces: 3,
     },
+    site: {
+      name: "ChamikoFiles",
+      description: "私人云盘",
+    },
+    upload: {
+      maxFileSize: 524288000,      // 500 MB
+      maxFilesPerBatch: 50,
+    },
+    security: {
+      maxLoginAttempts: 5,
+      lockoutMinutes: 15,
+      sessionTimeoutHours: 168,    // 7 days
+    },
+    notification: {
+      storageAlertPercent: 80,
+    },
   };
+}
+
+/** Safely parse a numeric value, returning defaultValue when absent or invalid */
+function safeInt(val: string | undefined, defaultValue: number): number {
+  if (val === undefined) return defaultValue;
+  const n = parseInt(val, 10);
+  return Number.isNaN(n) ? defaultValue : n;
 }
 
 export function readConfig(): AppConfig {
@@ -90,6 +113,22 @@ export function readConfig(): AppConfig {
         defaultSharedQuota: parseInt(parsed.quota?.defaultSharedQuota || String(defaultConfig.quota.defaultSharedQuota), 10),
         maxSharedSpaces: parseInt(parsed.quota?.maxSharedSpaces || String(defaultConfig.quota.maxSharedSpaces), 10),
       },
+      site: {
+        name: parsed.site?.name || defaultConfig.site.name,
+        description: parsed.site?.description || defaultConfig.site.description,
+      },
+      upload: {
+        maxFileSize: safeInt(parsed.upload?.maxFileSize, defaultConfig.upload.maxFileSize),
+        maxFilesPerBatch: safeInt(parsed.upload?.maxFilesPerBatch, defaultConfig.upload.maxFilesPerBatch),
+      },
+      security: {
+        maxLoginAttempts: safeInt(parsed.security?.maxLoginAttempts, defaultConfig.security.maxLoginAttempts),
+        lockoutMinutes: safeInt(parsed.security?.lockoutMinutes, defaultConfig.security.lockoutMinutes),
+        sessionTimeoutHours: safeInt(parsed.security?.sessionTimeoutHours, defaultConfig.security.sessionTimeoutHours),
+      },
+      notification: {
+        storageAlertPercent: safeInt(parsed.notification?.storageAlertPercent, defaultConfig.notification.storageAlertPercent),
+      },
     };
   } catch {
     return defaultConfig;
@@ -113,6 +152,22 @@ export function writeConfig(config: AppConfig): void {
       defaultSharedQuota: String(config.quota.defaultSharedQuota),
       maxSharedSpaces: String(config.quota.maxSharedSpaces),
     },
+    site: {
+      name: config.site.name,
+      description: config.site.description,
+    },
+    upload: {
+      maxFileSize: String(config.upload.maxFileSize),
+      maxFilesPerBatch: String(config.upload.maxFilesPerBatch),
+    },
+    security: {
+      maxLoginAttempts: String(config.security.maxLoginAttempts),
+      lockoutMinutes: String(config.security.lockoutMinutes),
+      sessionTimeoutHours: String(config.security.sessionTimeoutHours),
+    },
+    notification: {
+      storageAlertPercent: String(config.notification.storageAlertPercent),
+    },
   };
   const content = serializeIni(data);
   fs.writeFileSync(CONFIG_PATH, content, "utf-8");
@@ -124,6 +179,10 @@ export function updateConfig(partial: Partial<AppConfig>): AppConfig {
     storage: { ...current.storage, ...(partial.storage || {}) },
     display: { ...current.display, ...(partial.display || {}) },
     quota: { ...current.quota, ...(partial.quota || {}) },
+    site: { ...current.site, ...(partial.site || {}) },
+    upload: { ...current.upload, ...(partial.upload || {}) },
+    security: { ...current.security, ...(partial.security || {}) },
+    notification: { ...current.notification, ...(partial.notification || {}) },
   };
   writeConfig(updated);
   return updated;

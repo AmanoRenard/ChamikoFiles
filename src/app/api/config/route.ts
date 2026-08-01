@@ -81,6 +81,34 @@ export async function PUT(request: NextRequest) {
     if (Object.keys(q).length > 0) partial.quota = q;
   }
 
+  if (body.site) {
+    const si: Record<string, string | number> = {};
+    if (typeof body.site.name === "string") si.name = body.site.name.trim();
+    if (typeof body.site.description === "string") si.description = body.site.description.trim();
+    if (Object.keys(si).length > 0) partial.site = si;
+  }
+
+  if (body.upload) {
+    const u: Record<string, string | number> = {};
+    if (typeof body.upload.maxFileSize === "number") u.maxFileSize = body.upload.maxFileSize;
+    if (typeof body.upload.maxFilesPerBatch === "number") u.maxFilesPerBatch = body.upload.maxFilesPerBatch;
+    if (Object.keys(u).length > 0) partial.upload = u;
+  }
+
+  if (body.security) {
+    const sec: Record<string, string | number> = {};
+    if (typeof body.security.maxLoginAttempts === "number") sec.maxLoginAttempts = body.security.maxLoginAttempts;
+    if (typeof body.security.lockoutMinutes === "number") sec.lockoutMinutes = body.security.lockoutMinutes;
+    if (typeof body.security.sessionTimeoutHours === "number") sec.sessionTimeoutHours = body.security.sessionTimeoutHours;
+    if (Object.keys(sec).length > 0) partial.security = sec;
+  }
+
+  if (body.notification) {
+    const n: Record<string, string | number> = {};
+    if (typeof body.notification.storageAlertPercent === "number") n.storageAlertPercent = body.notification.storageAlertPercent;
+    if (Object.keys(n).length > 0) partial.notification = n;
+  }
+
   // Detect path change: compare new path with current resolved base
   const currentBase = getStorageBase();
   // If rawStoragePath is empty, resolved path is the default uploads

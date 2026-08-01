@@ -25,12 +25,11 @@ import { SpaceSelector } from "@/components/space-selector";
 import { useSpaces } from "@/hooks/use-spaces";
 import { readConfig } from "@/lib/config";
 import { AnimatePresence, motion } from "framer-motion";
-import { FolderOpen, ChevronLeft, ChevronRight, X, Loader2, LogIn, Upload, MoreHorizontal } from "lucide-react";
-import Link from "next/link";
+import { FolderOpen, ChevronLeft, ChevronRight, X, Loader2, Upload, MoreHorizontal } from "lucide-react";
 
 export default function HomePage() {
   const { addToast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const {
     spaces,
     currentSpace,
@@ -580,38 +579,8 @@ export default function HomePage() {
 
   const imageFiles = useMemo(() => files.filter((f) => f.isImage), [files]);
 
-  // Auth loading
-  if (authLoading) {
-    return (
-      <div className="fixed inset-0 top-16 flex items-center justify-center z-50">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 size={28} className="animate-spin text-primary" />
-          <p className="text-sm text-slate-500">验证身份中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!authLoading && !user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
-        <div className="glass-card p-10 text-center max-w-md mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <LogIn size={32} className="text-primary-light" />
-          </div>
-          <h2 className="text-lg font-semibold text-slate-200 mb-2">请先登录</h2>
-          <p className="text-sm text-slate-500 mb-6">登录后即可访问和管理你的文件</p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-cyan text-white text-sm font-medium hover:brightness-110 transition-all shadow-lg shadow-primary/20"
-          >
-            <LogIn size={16} />
-            前往登录
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // AuthProvider now handles redirect for unauthenticated users
+  // so this page only renders when user is authenticated
 
   const canCreateMore =
     spaces.filter((s) => s.type === "shared" && s.role === "owner").length < 3;

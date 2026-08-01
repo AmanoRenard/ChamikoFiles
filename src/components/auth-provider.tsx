@@ -7,7 +7,9 @@ import {
   useEffect,
   useCallback,
 } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { AuthUser, ApiResponse, SetupCheckResponse } from "@/types";
+import { Loader2 } from "lucide-react";
 
 // ============ Types ============
 
@@ -23,9 +25,14 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Pages that don't require authentication
+const PUBLIC_PAGES = ["/login", "/register"];
+
 // ============ Provider ============
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
@@ -51,6 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     init();
   }, []);
+
+  // Redirect to /login if not authenticated and not on a public page
+  useEffect(() => {
+    if (!loading && !user && !PUBLIC_PAGES.includes(pathname)) {
+      router.replace("/login");
+    }
+  }, [loading, user, pathname, router]);
 
   const login = useCallback(async (username: string, password: string) => {
     const res = await fetch("/api/auth/login", {
@@ -95,6 +109,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(meData.data);
     }
   }, []);
+
+  // While loading or redirecting (unauthenticated), don't render children
+  // This prevents pages like home from firing API requests with stale cookies
+  if (loading || (!user && !PUBLIC_PAGES.includes(pathname))) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#0F0B1E] via-[#1A1530] to-[#0F0B1E] z-50">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={28} className="animate-spin text-primary" />
+          <p className="text-sm text-slate-500">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider

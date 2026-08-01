@@ -24,10 +24,15 @@ function ensureDir() {
 }
 
 function readJSON<T>(filePath: string, fallback: T): T {
-  if (!fs.existsSync(filePath)) return fallback;
-  const raw = fs.readFileSync(filePath, "utf-8").trim();
-  if (!raw) return fallback;
-  return JSON.parse(raw) as T;
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    const raw = fs.readFileSync(filePath, "utf-8").trim();
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch (err) {
+    console.error(`[db] readJSON failed for ${filePath}:`, err);
+    return fallback;
+  }
 }
 
 function writeJSON<T>(filePath: string, data: T) {

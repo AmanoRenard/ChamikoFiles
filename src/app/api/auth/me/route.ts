@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, clearAuthCookie } from "@/lib/auth";
 
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
+    // Clear stale cookie so browser doesn't keep sending invalid token
+    await clearAuthCookie();
     return NextResponse.json(
       { success: false, error: "未登录" },
       { status: 401 }
@@ -18,6 +20,7 @@ export async function GET() {
       nickname: user.nickname || user.username,
       avatar: user.avatar || null,
       isAdmin: user.isAdmin,
+      createdAt: user.createdAt || null,
     },
   });
 }

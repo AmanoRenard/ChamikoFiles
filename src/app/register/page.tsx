@@ -100,7 +100,14 @@ export default function RegisterPage() {
     }
   };
 
-  if (authLoading || needsSetup === null) {
+  // Redirect to login page if this is first-run setup (admin should be created from login page)
+  useEffect(() => {
+    if (needsSetup) {
+      router.replace("/login");
+    }
+  }, [needsSetup, router]);
+
+  if (authLoading || needsSetup === null || needsSetup) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 size={24} className="animate-spin text-primary" />
@@ -282,15 +289,17 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
-          已有账号？{" "}
-          <Link
-            href="/login"
-            className="text-primary-light hover:text-primary transition-colors font-medium"
-          >
-            立即登录
-          </Link>
-        </p>
+        {!needsSetup && (
+          <p className="text-center text-sm text-slate-500 mt-6">
+            已有账号？{" "}
+            <Link
+              href="/login"
+              className="text-primary-light hover:text-primary transition-colors font-medium"
+            >
+              立即登录
+            </Link>
+          </p>
+        )}
       </motion.div>
     </div>
   );
