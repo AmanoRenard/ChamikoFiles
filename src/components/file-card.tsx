@@ -30,6 +30,8 @@ function FileCardRaw({
   onContextMenu,
 }: FileCardProps) {
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
@@ -40,6 +42,42 @@ function FileCardRaw({
     const dx = e.clientX - mouseDownPos.current.x;
     const dy = e.clientY - mouseDownPos.current.y;
     return Math.abs(dx) > 5 || Math.abs(dy) > 5;
+  };
+
+  // Mobile: long press to toggle select
+  const handleTouchStart = (e: React.TouchEvent) => {
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      // 阻止浏览器默认长按菜单（夸克等国产浏览器兼容）
+      e.preventDefault();
+      onToggleSelect(file.name);
+      // Vibrate feedback
+      if (navigator.vibrate) navigator.vibrate(10);
+    }, 500);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    // If long press was triggered, prevent default behavior and context menu
+    if (longPressTriggered.current) {
+      e.preventDefault();
+      longPressTriggered.current = false;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    // 如果长按已触发，阻止后续默认行为（防止拖动后弹菜单）
+    if (longPressTriggered.current) {
+      e.preventDefault();
+    }
   };
 
   const iconType = getFileTypeIcon(file.ext.toLowerCase());
@@ -100,14 +138,18 @@ function FileCardRaw({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className={`glass-card overflow-hidden cursor-pointer relative group hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 ${
+      className={`glass-card overflow-hidden cursor-pointer relative group hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 select-none ${
         selected ? "ring-2 ring-primary/60" : ""
       }`}
+      style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none" }}
       onMouseDown={handleMouseDown}
       onContextMenu={(e) => {
         e.preventDefault();
         onContextMenu(e, file);
       }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
       onClick={handleClick}
     >
       {/* Select checkbox — always rendered, visibility controlled by CSS */}
@@ -136,13 +178,21 @@ function FileCardRaw({
             <Folder size={24} className="sm:size-[32px] text-amber-400" />
           </div>
         ) : file.isImage ? (
-          <img
-            src={thumbnailUrl}
-            alt={file.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-            draggable={false}
-          />
+          <div className="relative w-full h-full">
+            <img
+              src={thumbnailUrl}
+              alt={file.name}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+              draggable={false}
+              style={{ WebkitTouchCallout: "none", pointerEvents: "none" }}
+            />
+            {/* 透明覆盖层，拦截图片上的长按事件，防止浏览器弹出图片菜单 */}
+            <div
+              className="absolute inset-0"
+              onContextMenu={(e) => e.preventDefault()}
+            />
+          </div>
         ) : file.isAudio ? (
           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
             <Music size={24} className="sm:size-[32px] text-primary" />
@@ -181,7 +231,7 @@ function FileCardRaw({
             {file.name}
           </span>
         </p>
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 select-none" style={{ WebkitTouchCallout: "none" }}>
           {file.isFolder ? (
             <span>{file.folderItemCount ?? 0} 项</span>
           ) : (
