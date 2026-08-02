@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-const AUTH_PATHS = ["/login", "/register"];
+const AUTH_PATHS = ["/login", "/register", "/setup"];
 
 export function MainWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

@@ -14,6 +14,7 @@ const COOKIE_NAME = "chamiko-token";
 const PUBLIC_PATHS = [
   "/login",
   "/register",
+  "/setup",
   "/api/auth",
   "/_next",
   "/favicon.ico",

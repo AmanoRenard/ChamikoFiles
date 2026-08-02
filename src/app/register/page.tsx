@@ -9,6 +9,8 @@ import {
   EyeOff,
   Loader2,
   Shield,
+  Check,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
@@ -22,6 +24,27 @@ function isPasswordValid(pwd: string): boolean {
   const categories = [hasLetter, hasDigit, hasSpecial].filter(Boolean).length;
   return categories >= 2;
 }
+
+type PasswordStrength = "empty" | "weak" | "medium" | "strong";
+
+function getStrength(pwd: string): PasswordStrength {
+  if (!pwd) return "empty";
+  if (pwd.length < 8) return "weak";
+  const hasLetter = /[a-zA-Z]/.test(pwd);
+  const hasDigit = /[0-9]/.test(pwd);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{}|;:'",.<>?/\\`~]/.test(pwd);
+  const count = [hasLetter, hasDigit, hasSpecial].filter(Boolean).length;
+  if (pwd.length >= 10 && count === 3) return "strong";
+  if (pwd.length >= 8 && count >= 2) return "medium";
+  return "weak";
+}
+
+const strengthConfig: Record<PasswordStrength, { label: string; color: string; width: string }> = {
+  empty: { label: "", color: "bg-white/5", width: "0%" },
+  weak: { label: "弱", color: "bg-red-500", width: "33%" },
+  medium: { label: "中等", color: "bg-yellow-500", width: "66%" },
+  strong: { label: "强", color: "bg-emerald-500", width: "100%" },
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -214,6 +237,42 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+
+              {/* Password strength indicator */}
+              {password && (
+                <motion.div
+                  className="mt-2"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                >
+                  <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full ${strengthConfig[getStrength(password)].color}`}
+                      initial={{ width: "0%" }}
+                      animate={{ width: strengthConfig[getStrength(password)].width }}
+                      transition={{ duration: 0.4 }}
+                    />
+                  </div>
+                  <p
+                    className="text-[11px] mt-1"
+                    style={{
+                      color:
+                        getStrength(password) === "weak"
+                          ? "#EF4444"
+                          : getStrength(password) === "medium"
+                          ? "#F59E0B"
+                          : "#22C55E",
+                    }}
+                  >
+                    密码强度：{strengthConfig[getStrength(password)].label}
+                    <span className="text-slate-600 ml-1">
+                      {getStrength(password) === "weak" && "（需至少8位，含字母+数字/符号）"}
+                      {getStrength(password) === "medium" && "（可用）"}
+                      {getStrength(password) === "strong" && "（安全性高）"}
+                    </span>
+                  </p>
+                </motion.div>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -221,14 +280,34 @@ export default function RegisterPage() {
               <label className="block text-xs font-medium text-slate-400 mb-1.5">
                 确认密码
               </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="再次输入密码"
-                autoComplete="new-password"
-                className="w-full h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all"
-              />
+              <div className="relative">
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="再次输入密码"
+                  autoComplete="new-password"
+                  className="w-full h-11 px-4 pr-10 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all [&::-ms-reveal]:hidden"
+                />
+                {confirmPassword && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {confirmPassword === password ? (
+                      <Check size={16} className="text-emerald-400" />
+                    ) : (
+                      <X size={16} className="text-red-400" />
+                    )}
+                  </span>
+                )}
+              </div>
+              {confirmPassword && confirmPassword !== password && (
+                <motion.p
+                  className="text-[11px] text-red-400 mt-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  两次密码输入不一致
+                </motion.p>
+              )}
             </div>
 
             {/* Invitation Code — only for non-first users */}

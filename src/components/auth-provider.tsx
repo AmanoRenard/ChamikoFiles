@@ -26,7 +26,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 // Pages that don't require authentication
-const PUBLIC_PAGES = ["/login", "/register"];
+const PUBLIC_PAGES = ["/login", "/register", "/setup"];
 
 // ============ Provider ============
 
@@ -40,14 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check auth status & setup state on mount
   useEffect(() => {
     const init = async () => {
-      // Check setup
+      // Check setup first
       const setupRes = await fetch("/api/auth/check-setup");
       const setupData: ApiResponse<SetupCheckResponse> = await setupRes.json();
-      if (setupData.success && setupData.data) {
-        setNeedsSetup(setupData.data.needsSetup);
+      const isFirstRun = setupData.success && setupData.data?.needsSetup;
+      if (isFirstRun) {
+        setNeedsSetup(true);
+        setLoading(false);
+        return;
       }
+      setNeedsSetup(false);
 
-      // Check current user
+      // Only check current user if setup is already done (not first-run)
       const meRes = await fetch("/api/auth/me");
       const meData: ApiResponse<AuthUser> = await meRes.json();
       if (meData.success && meData.data) {

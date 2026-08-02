@@ -298,3 +298,17 @@ export interface RenameSpaceRequest {
 export interface JoinSpaceRequest {
   code: string;
 }
+
+// ============ 初始化向导类型 ============
+
+export type SetupStep = "welcome" | "admin" | "site" | "security" | "complete";
+
+export const SETUP_STEPS: SetupStep[] = ["welcome", "admin", "site", "security", "complete"];
+
+export const STEP_LABELS: Record<SetupStep, string> = {
+  welcome: "欢迎",
+  admin: "管理员",
+  site: "站点",
+  security: "安全",
+  complete: "完成",
+};
