@@ -1,8 +1,41 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { AppConfig } from "@/types";
 
-const CONFIG_PATH = path.join(process.cwd(), "config.ini");
+/**
+ * Get the data directory where config.ini and JSON data files are stored.
+ * Priority:
+ *   1. CHAMIKO_DATA_DIR environment variable (if set)
+ *   2. Windows: C:\ProgramData\Chamiko\Chamiko Files
+ *   3. Other: ~/ChamikoFiles
+ */
+export function getDataDir(): string {
+  if (process.env.CHAMIKO_DATA_DIR) {
+    return path.resolve(process.env.CHAMIKO_DATA_DIR);
+  }
+  if (process.platform === "win32") {
+    return path.join(
+      process.env.ProgramData || "C:\\ProgramData",
+      "Chamiko",
+      "Chamiko Files"
+    );
+  }
+  return path.join(os.homedir(), "ChamikoFiles");
+}
+
+/** Ensure the data directory exists on first access */
+function ensureDataDir(): void {
+  const dir = getDataDir();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+const CONFIG_PATH = (() => {
+  ensureDataDir();
+  return path.join(getDataDir(), "config.ini");
+})();
 
 function parseIni(content: string): Record<string, Record<string, string>> {
   const result: Record<string, Record<string, string>> = {};
@@ -46,6 +79,7 @@ function serializeIni(data: Record<string, Record<string, string>>): string {
 
 function getDefaultConfig(): AppConfig {
   return {
+    system: {},
     storage: {
       path: "uploads",
       maxSpace: 10737418240,
@@ -98,6 +132,7 @@ export function readConfig(): AppConfig {
     const parsed = parseIni(raw);
 
     return {
+      system: {},
       storage: {
         path: parsed.storage?.path || "",
         maxSpace: parseInt(parsed.storage?.maxSpace || String(defaultConfig.storage.maxSpace), 10),
@@ -136,38 +171,37 @@ export function readConfig(): AppConfig {
 }
 
 export function writeConfig(config: AppConfig): void {
-  const data = {
-    storage: {
-      path: config.storage.path,
-      maxSpace: String(config.storage.maxSpace),
-      allowedTypes: config.storage.allowedTypes,
-    },
-    display: {
-      viewMode: config.display.viewMode,
-      sortBy: config.display.sortBy,
-      sortOrder: config.display.sortOrder,
-    },
-    quota: {
-      defaultPersonalQuota: String(config.quota.defaultPersonalQuota),
-      defaultSharedQuota: String(config.quota.defaultSharedQuota),
-      maxSharedSpaces: String(config.quota.maxSharedSpaces),
-    },
-    site: {
-      name: config.site.name,
-      description: config.site.description,
-    },
-    upload: {
-      maxFileSize: String(config.upload.maxFileSize),
-      maxFilesPerBatch: String(config.upload.maxFilesPerBatch),
-    },
-    security: {
-      maxLoginAttempts: String(config.security.maxLoginAttempts),
-      lockoutMinutes: String(config.security.lockoutMinutes),
-      sessionTimeoutHours: String(config.security.sessionTimeoutHours),
-    },
-    notification: {
-      storageAlertPercent: String(config.notification.storageAlertPercent),
-    },
+  const data: Record<string, Record<string, string>> = {};
+  data.storage = {
+    path: config.storage.path,
+    maxSpace: String(config.storage.maxSpace),
+    allowedTypes: config.storage.allowedTypes,
+  };
+  data.display = {
+    viewMode: config.display.viewMode,
+    sortBy: config.display.sortBy,
+    sortOrder: config.display.sortOrder,
+  };
+  data.quota = {
+    defaultPersonalQuota: String(config.quota.defaultPersonalQuota),
+    defaultSharedQuota: String(config.quota.defaultSharedQuota),
+    maxSharedSpaces: String(config.quota.maxSharedSpaces),
+  };
+  data.site = {
+    name: config.site.name,
+    description: config.site.description,
+  };
+  data.upload = {
+    maxFileSize: String(config.upload.maxFileSize),
+    maxFilesPerBatch: String(config.upload.maxFilesPerBatch),
+  };
+  data.security = {
+    maxLoginAttempts: String(config.security.maxLoginAttempts),
+    lockoutMinutes: String(config.security.lockoutMinutes),
+    sessionTimeoutHours: String(config.security.sessionTimeoutHours),
+  };
+  data.notification = {
+    storageAlertPercent: String(config.notification.storageAlertPercent),
   };
   const content = serializeIni(data);
   fs.writeFileSync(CONFIG_PATH, content, "utf-8");
@@ -176,6 +210,7 @@ export function writeConfig(config: AppConfig): void {
 export function updateConfig(partial: Partial<AppConfig>): AppConfig {
   const current = readConfig();
   const updated: AppConfig = {
+    system: {},
     storage: { ...current.storage, ...(partial.storage || {}) },
     display: { ...current.display, ...(partial.display || {}) },
     quota: { ...current.quota, ...(partial.quota || {}) },

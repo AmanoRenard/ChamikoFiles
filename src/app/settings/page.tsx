@@ -70,7 +70,7 @@ export default function SettingsPage() {
         // Storage
         const p = cfg.storage.path || "";
         const isAbs = /^[A-Za-z]:[\\/]/.test(p) || p.startsWith("/");
-        setStoragePath(isAbs ? p : "");
+        setStoragePath(isAbs ? p.replace(/\\/g, "/") : "");
         setMaxSpaceGB(cfg.storage.maxSpace > 0 ? (cfg.storage.maxSpace / 1073741824).toFixed(1) : "");
         setAllowedTypes(cfg.storage.allowedTypes);
         setPersonalQuotaGB(cfg.quota.defaultPersonalQuota > 0 ? (cfg.quota.defaultPersonalQuota / 1073741824).toFixed(1) : "");
@@ -262,9 +262,9 @@ export default function SettingsPage() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="glass-card p-5">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"><Folder size={18} className="text-primary-light" /></div>
-                <div><h2 className="text-sm font-semibold text-slate-200">存储路径</h2><p className="text-xs text-slate-500">文件保存的目标文件夹，留空使用默认路径</p></div>
+                <div><h2 className="text-sm font-semibold text-slate-200">文件存放目录</h2><p className="text-xs text-slate-500">用户上传文件保存的目标文件夹，留空使用默认路径</p></div>
               </div>
-              <input type="text" value={storagePath} onChange={(e) => setStoragePath(e.target.value)} placeholder="默认路径" className={inputClass} />
+              <input type="text" value={storagePath} onChange={(e) => setStoragePath(e.target.value)} placeholder="留空使用默认路径" className={inputClass} />
             </motion.div>
 
             {/* Global Space Limit */}

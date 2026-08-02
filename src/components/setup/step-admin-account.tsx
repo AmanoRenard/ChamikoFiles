@@ -9,6 +9,7 @@ import {
   User,
   UserCircle,
   Lock,
+  KeyRound,
   Check,
   X,
 } from "lucide-react";
@@ -183,7 +184,7 @@ export default function StepAdminAccount({ data, onChange, error }: Props) {
           {/* Confirm Password */}
           <div>
             <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
-              <Lock size={13} />
+              <KeyRound size={13} />
               确认密码
             </label>
             <div className="relative">

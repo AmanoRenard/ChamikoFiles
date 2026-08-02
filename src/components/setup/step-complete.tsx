@@ -97,8 +97,8 @@ export default function StepComplete({
     },
     {
       icon: FolderOpen,
-      label: "存储路径",
-      value: siteData.storagePath || "默认路径 (程序目录/uploads)",
+      label: "文件存放目录",
+      value: (siteData.storagePath || "默认路径 (C:/Users/Public/Chamiko/Chamiko Files)").replace(/\\/g, "/"),
       color: "text-amber-400",
     },
     {

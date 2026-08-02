@@ -7,8 +7,9 @@ import fs from "fs";
 import path from "path";
 import { db } from "@/lib/db";
 import { ensureSpaceDirectory } from "@/lib/file-utils-server";
+import { getDataDir } from "@/lib/config";
 
-const MIGRATION_FLAG = path.resolve(process.cwd(), "data", ".migration_done");
+const MIGRATION_FLAG = path.join(getDataDir(), ".migration_done");
 
 /**
  * Run migrations if not already done.

@@ -16,6 +16,7 @@ export interface FileInfo {
 
 // 应用配置类型
 export interface AppConfig {
+  system: Record<string, never>;
   storage: {
     path: string;
     maxSpace: number;

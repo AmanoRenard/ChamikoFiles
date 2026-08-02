@@ -11,6 +11,11 @@ import {
   Shield,
   Check,
   X,
+  User,
+  UserCircle,
+  Lock,
+  KeyRound,
+  Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
@@ -139,7 +144,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden py-8">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden py-8 select-none">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0F0B1E] via-[#1A1530] to-[#0F0B1E]" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
@@ -182,7 +187,8 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <User size={13} />
                 用户名
               </label>
               <input
@@ -197,7 +203,8 @@ export default function RegisterPage() {
 
             {/* Nickname */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <UserCircle size={13} />
                 昵称
               </label>
               <input
@@ -212,7 +219,8 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <Lock size={13} />
                 密码
               </label>
               <div className="relative">
@@ -277,7 +285,8 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <KeyRound size={13} />
                 确认密码
               </label>
               <div className="relative">
@@ -318,7 +327,8 @@ export default function RegisterPage() {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                 >
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                    <Ticket size={13} />
                     邀请码
                   </label>
                   <input

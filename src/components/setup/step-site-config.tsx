@@ -79,13 +79,13 @@ export default function StepSiteConfig({ data, onChange }: Props) {
           <div>
             <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
               <FolderOpen size={13} />
-              存储路径
+              文件存放目录
             </label>
             <input
               type="text"
               value={data.storagePath}
               onChange={(e) => onChange({ ...data, storagePath: e.target.value })}
-              placeholder="留空使用默认路径 (程序目录/uploads)"
+              placeholder="留空使用默认路径"
               className="w-full h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all"
             />
 
@@ -98,11 +98,8 @@ export default function StepSiteConfig({ data, onChange }: Props) {
             >
               <Info size={13} className="text-slate-500 flex-shrink-0 mt-0.5" />
               <div className="text-[11px] text-slate-500 leading-relaxed">
-                <p>文件存储的根目录路径。请输入绝对路径，例如：</p>
-                <p className="text-slate-400 mt-0.5">
-                  /data/uploads &nbsp;或&nbsp; C:/Storage/Files
-                </p>
-                <p className="mt-0.5">留空则使用程序目录下的 uploads 文件夹</p>
+                <p>文件存放的根目录路径。请输入绝对路径，例如：D:/Files</p>
+                <p className="mt-0.5">留空则使用系统公共目录下的 Chamiko Files 文件夹</p>
               </div>
             </motion.div>
           </div>

@@ -3,22 +3,37 @@ import { getFileExtension, isImageFile, getMimeType, isVideoFile, isAudioFile, i
 import { readConfig } from "@/lib/config";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 // ============ Space path resolution ============
 
 /**
+ * Get the default storage base path for file storage.
+ * Windows: C:\Users\Public\Chamiko\Chamiko Files
+ * Other: ~/ChamikoFiles/uploads
+ */
+function getDefaultStorageBase(): string {
+  if (process.platform === "win32") {
+    return path.join(
+      process.env.PUBLIC || "C:\\Users\\Public",
+      "Chamiko",
+      "Chamiko Files"
+    );
+  }
+  return path.join(os.homedir(), "ChamikoFiles", "uploads");
+}
+
+/**
  * Dynamically read storage base path from config.ini.
- * Uses the configured storage.path, resolved relative to project root.
- * Falls back to "uploads" if not configured.
+ * Uses the configured storage.path if set, otherwise falls back to platform default.
  */
 export function getStorageBase(): string {
   const config = readConfig();
   const configuredPath = config.storage.path || "";
-  // Empty or relative path defaults to uploads
-  if (!configuredPath || !path.isAbsolute(configuredPath)) {
-    return path.resolve(process.cwd(), "uploads");
+  if (configuredPath && path.isAbsolute(configuredPath)) {
+    return configuredPath;
   }
-  return configuredPath;
+  return getDefaultStorageBase();
 }
 
 /**

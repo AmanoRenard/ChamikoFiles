@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Cloud, Eye, EyeOff, Loader2,
+  Cloud, Eye, EyeOff, Loader2, User, Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
@@ -84,7 +84,7 @@ export default function LoginPage() {
 
   // ==================== NORMAL LOGIN ====================
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden select-none">
       {/* Background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0F0B1E] via-[#1A1530] to-[#0F0B1E]" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
@@ -116,7 +116,8 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Username */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <User size={13} />
                 用户名
               </label>
               <input
@@ -131,7 +132,8 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5">
+                <Lock size={13} />
                 密码
               </label>
               <div className="relative">

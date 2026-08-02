@@ -111,10 +111,10 @@ export async function PUT(request: NextRequest) {
 
   // Detect path change: compare new path with current resolved base
   const currentBase = getStorageBase();
-  // If rawStoragePath is empty, resolved path is the default uploads
+  // If rawStoragePath is empty, resolved path is the default storage base
   const newResolved = rawStoragePath
     ? path.resolve(rawStoragePath)
-    : path.resolve(process.cwd(), "uploads");
+    : getStorageBase();
 
   const pathChanged = newResolved !== currentBase;
 

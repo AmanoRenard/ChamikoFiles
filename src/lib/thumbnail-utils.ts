@@ -1,10 +1,27 @@
 import path from "path";
 import fs from "fs";
+import os from "os";
 import crypto from "crypto";
 import sharp from "sharp";
 import { readConfig } from "@/lib/config";
 
 // ============ Cache path utilities ============
+
+/**
+ * Get the default storage base path for file storage.
+ * Windows: C:\Users\Public\Chamiko\Chamiko Files
+ * Other: ~/ChamikoFiles/uploads
+ */
+function getDefaultStorageBase(): string {
+  if (process.platform === "win32") {
+    return path.join(
+      process.env.PUBLIC || "C:\\Users\\Public",
+      "Chamiko",
+      "Chamiko Files"
+    );
+  }
+  return path.join(os.homedir(), "ChamikoFiles", "uploads");
+}
 
 /**
  * Resolve the storage base path, matching the logic in file-utils-server.ts.
@@ -13,10 +30,10 @@ import { readConfig } from "@/lib/config";
 function getStorageBase(): string {
   const config = readConfig();
   const configuredPath = config.storage.path || "";
-  if (!configuredPath || !path.isAbsolute(configuredPath)) {
-    return path.resolve(process.cwd(), "uploads");
+  if (configuredPath && path.isAbsolute(configuredPath)) {
+    return configuredPath;
   }
-  return configuredPath;
+  return getDefaultStorageBase();
 }
 
 /**

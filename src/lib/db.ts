@@ -6,8 +6,9 @@
 import fs from "fs";
 import path from "path";
 import { User, InvitationCode, SharedSpace, SpaceMember, SpaceInvite, UserQuota } from "@/types";
+import { getDataDir } from "@/lib/config";
 
-const DATA_DIR = path.resolve(process.cwd(), "data");
+const DATA_DIR = getDataDir();
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const INVITES_FILE = path.join(DATA_DIR, "invitations.json");
 const SPACES_FILE = path.join(DATA_DIR, "spaces.json");
@@ -163,11 +164,15 @@ export const db = {
     createdBy: number,
     expiresAt: string
   ): InvitationCode {
-    // First deactivate all other active codes
+    // Remove all expired or used codes, keep only the active one (if any) and mark it as used
     const invs = loadUsersInvitations();
-    const updated = invs.map((inv) =>
-      !inv.isUsed ? { ...inv, isUsed: true } : inv
+    const now = new Date().toISOString();
+
+    // Only keep records that are still fresh and unused; mark them as used since we’re creating a new one
+    const cleaned = invs.filter(
+      (inv) => !inv.isUsed && inv.expiresAt > now
     );
+    const updated = cleaned.map((inv) => ({ ...inv, isUsed: true }));
 
     const id =
       invs.length > 0 ? Math.max(...invs.map((i) => i.id)) + 1 : 1;

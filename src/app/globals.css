@@ -26,9 +26,6 @@
   --glass-border: rgba(255, 255, 255, 0.06);
 }
 
-
-
-
 * {
   margin: 0;
   padding: 0;
@@ -48,8 +45,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-
-
 body::before {
   content: "";
   position: fixed;
@@ -65,7 +60,6 @@ body::before {
   z-index: -1;
   transition: opacity 0.3s ease;
 }
-
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -141,6 +135,18 @@ body::before {
   );
   background-size: 200% 100%;
   animation: progress-shimmer 2s linear infinite;
+}
+
+/* Completely hide native number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Mobile touch optimizations */

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDataDir } from "@/lib/config";
 import fs from "fs";
 import path from "path";
 
-const AVATARS_DIR = path.resolve(process.cwd(), "data", "avatars");
+const AVATARS_DIR = path.join(getDataDir(), "avatars");
 
 export async function GET(
   _request: NextRequest,

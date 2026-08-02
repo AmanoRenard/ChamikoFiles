@@ -114,7 +114,7 @@ export function StorageMigrateDialog({
               <div className="flex-1 min-w-0">
                 <div className="text-slate-500 mb-1">当前路径</div>
                 <div className="text-slate-400 truncate font-mono bg-white/[0.02] rounded-lg px-2.5 py-1.5">
-                  {oldPath}
+                  {oldPath.replace(/\\/g, "/")}
                 </div>
               </div>
               <div className="text-slate-600 mt-4 flex-shrink-0">
@@ -123,7 +123,7 @@ export function StorageMigrateDialog({
               <div className="flex-1 min-w-0">
                 <div className="text-slate-500 mb-1">新路径</div>
                 <div className="text-primary-light truncate font-mono bg-primary/[0.06] rounded-lg px-2.5 py-1.5">
-                  {newPath}
+                  {newPath.replace(/\\/g, "/")}
                 </div>
               </div>
             </div>

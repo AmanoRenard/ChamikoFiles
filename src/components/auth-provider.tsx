@@ -121,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#0F0B1E] via-[#1A1530] to-[#0F0B1E] z-50">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={28} className="animate-spin text-primary" />
-          <p className="text-sm text-slate-500">加载中...</p>
         </div>
       </div>
     );

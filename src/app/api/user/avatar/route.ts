@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getDataDir } from "@/lib/config";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 
-const AVATARS_DIR = path.resolve(process.cwd(), "data", "avatars");
+const AVATARS_DIR = path.join(getDataDir(), "avatars");
 
 function ensureAvatarsDir() {
   if (!fs.existsSync(AVATARS_DIR)) {
