@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Copy, RefreshCw, Clock, Check, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "./toast-provider";
@@ -19,6 +19,7 @@ export function SpaceInviteDialog({ spaceId, open, onClose }: Props) {
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState("");
+  const remainingRef = useRef(0);
 
   const fetchInvite = useCallback(async () => {
     setLoading(true);
@@ -27,6 +28,7 @@ export function SpaceInviteDialog({ spaceId, open, onClose }: Props) {
       const data = await res.json();
       if (data.success && data.data) {
         setInvite(data.data);
+        remainingRef.current = data.data.remainingSeconds;
       }
     } catch {
       // no active invite
@@ -40,17 +42,17 @@ export function SpaceInviteDialog({ spaceId, open, onClose }: Props) {
 
   useEffect(() => {
     if (!invite) return;
+    remainingRef.current = invite.remainingSeconds;
     const update = () => {
-      const remaining = Math.max(0, invite.remainingSeconds - 1);
-      invite.remainingSeconds = remaining;
+      const remaining = Math.max(0, remainingRef.current - 1);
+      remainingRef.current = remaining;
       if (remaining <= 0) {
         setCountdown("已过期");
         return;
       }
       const h = Math.floor(remaining / 3600);
       const m = Math.floor((remaining % 3600) / 60);
-      const s = remaining % 60;
-      setCountdown(`${h}时${m}分${s}秒`);
+      setCountdown(`${h}时${m}分`);
     };
     update();
     const timer = setInterval(update, 1000);
@@ -66,6 +68,7 @@ export function SpaceInviteDialog({ spaceId, open, onClose }: Props) {
       const data = await res.json();
       if (data.success) {
         setInvite(data.data);
+        remainingRef.current = data.data.remainingSeconds;
         addToast("邀请链接已生成", "success");
       } else {
         addToast(data.error || "生成失败", "error");

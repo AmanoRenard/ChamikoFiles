@@ -214,22 +214,18 @@ export function SpaceSidebar({
         />
       )}
 
-      {inviteSpaceId && (
-        <SpaceInviteDialog
-          spaceId={inviteSpaceId}
-          open={true}
-          onClose={() => setInviteSpaceId(null)}
-        />
-      )}
+      <SpaceInviteDialog
+        spaceId={inviteSpaceId || ""}
+        open={inviteSpaceId !== null}
+        onClose={() => setInviteSpaceId(null)}
+      />
 
-      {membersSpaceId && (
-        <SpaceMembersDialog
-          spaceId={membersSpaceId}
-          open={true}
-          onClose={() => setMembersSpaceId(null)}
-          isOwner={membersIsOwner}
-        />
-      )}
+      <SpaceMembersDialog
+        spaceId={membersSpaceId || ""}
+        open={membersSpaceId !== null}
+        onClose={() => setMembersSpaceId(null)}
+        isOwner={membersIsOwner}
+      />
 
       <SpaceJoinDialog
         open={joinOpen}

@@ -316,6 +316,11 @@ export default function HomePage() {
     if (result.success) {
       addToast(`已删除: ${deleteTarget}`, "success");
       setFiles((prev) => prev.filter((f) => f.name !== deleteTarget));
+      setSelectedItems((prev) => {
+        const next = new Set(prev);
+        next.delete(deleteTarget);
+        return next;
+      });
     } else {
       addToast(result.error || "删除失败", "error");
     }

@@ -90,7 +90,7 @@ export function SpaceJoinDialog({ open, onClose, onJoined }: Props) {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleJoin();
                   }}
-                  placeholder="例如：A1B2-C3D4"
+                  placeholder="例如：A1B2C3D4"
                   className="w-full h-11 px-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/40 transition-all tracking-widest text-center"
                   autoFocus
                   maxLength={20}
