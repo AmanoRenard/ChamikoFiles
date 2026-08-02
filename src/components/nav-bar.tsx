@@ -11,16 +11,22 @@ import { StorageStats } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 
-export function NavBar() {
+interface NavBarProps {
+  initialSiteName?: string;
+  initialSiteDesc?: string;
+  initialSmartGradient?: boolean;
+}
+
+export function NavBar({ initialSiteName = "ChamikoFiles", initialSiteDesc = "私人云盘", initialSmartGradient = true }: NavBarProps = {}) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const userAreaRef = useRef<HTMLButtonElement>(null);
-  const [siteName, setSiteName] = useState("ChamikoFiles");
-  const [siteDesc, setSiteDesc] = useState("私人云盘");
-  const [smartGradient, setSmartGradient] = useState(true);
+  const [siteName, setSiteName] = useState(initialSiteName);
+  const [siteDesc, setSiteDesc] = useState(initialSiteDesc);
+  const [smartGradient, setSmartGradient] = useState(initialSmartGradient);
 
   useEffect(() => {
     fetch("/api/config/site")

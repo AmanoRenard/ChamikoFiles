@@ -1,16 +1,28 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-import { NavBar } from "./nav-bar";
+import { readConfig } from "@/lib/config";
+import { NavBarWrapperClient } from "./nav-bar-wrapper-client";
 
 const HIDDEN_NAV_PATHS = ["/login", "/register", "/setup"];
 
 export function NavBarWrapper() {
-  const pathname = usePathname();
+  let siteName = "ChamikoFiles";
+  let siteDesc = "私人云盘";
+  let smartGradient = true;
 
-  if (HIDDEN_NAV_PATHS.includes(pathname)) {
-    return null;
+  try {
+    const config = readConfig();
+    siteName = config.site?.name || "ChamikoFiles";
+    siteDesc = config.site?.description || "私人云盘";
+    smartGradient = config.site?.smartGradient ?? true;
+  } catch {
+    // use defaults
   }
 
-  return <NavBar />;
+  return (
+    <NavBarWrapperClient
+      initialSiteName={siteName}
+      initialSiteDesc={siteDesc}
+      initialSmartGradient={smartGradient}
+      hiddenPaths={HIDDEN_NAV_PATHS}
+    />
+  );
 }

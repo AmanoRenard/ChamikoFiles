@@ -633,6 +633,9 @@ export default function HomePage() {
                 />
               </div>
 
+              {/* 分隔线 */}
+              <div className="border-b border-white/[0.04]" />
+
               {/* Toolbar */}
               <div className="flex items-center gap-2.5 flex-wrap">
                 <SearchBar
