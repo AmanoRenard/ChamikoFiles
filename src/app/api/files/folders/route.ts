@@ -1,18 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStorageBase, safeResolvePath } from "@/lib/file-utils-server";
+import { resolveSpacePath, safeResolvePath } from "@/lib/file-utils-server";
+import { requireAuth, authError } from "@/lib/auth";
+import { checkSpaceAccess } from "@/lib/spaces";
 import fs from "fs";
 import path from "path";
 
-// GET: 列出所有文件夹（用于移动时选择目标）
+// GET: 列出指定空间内的所有文件夹（用于移动时选择目标）
 export async function GET(request: NextRequest) {
-  const storageBase = getStorageBase();
+  // 认证
+  let user: { userId: number; username: string };
+  try {
+    user = await requireAuth();
+  } catch {
+    return authError("请先登录", 401);
+  }
+
   const { searchParams } = new URL(request.url);
   const parentPath = searchParams.get("path") || "";
+  const spaceType = searchParams.get("spaceType") || "personal";
+  const spaceId = searchParams.get("spaceId") || String(user.userId);
+
+  // 空间访问检查
+  const accessCheck = checkSpaceAccess(spaceType, spaceId, user.userId);
+  if (!accessCheck.allowed) {
+    return NextResponse.json({ success: false, error: accessCheck.error }, { status: 403 });
+  }
+
+  // 使用空间隔离路径解析
+  const spaceRoot = resolveSpacePath(spaceType, spaceId, "");
 
   let currentDir: string;
   try {
-    currentDir = safeResolvePath(storageBase, parentPath);
+    currentDir = safeResolvePath(spaceRoot, parentPath);
   } catch {
+    return NextResponse.json({ success: false, error: "非法路径" }, { status: 403 });
+  }
+
+  // 路径穿越防护：确保当前目录在空间根目录内
+  if (!currentDir.startsWith(spaceRoot)) {
     return NextResponse.json({ success: false, error: "非法路径" }, { status: 403 });
   }
 

@@ -35,6 +35,7 @@ export interface AppConfig {
   site: {
     name: string;
     description: string;
+    smartGradient: boolean;
   };
   upload: {
     maxFileSize: number;

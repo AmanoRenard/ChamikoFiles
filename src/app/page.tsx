@@ -804,8 +804,8 @@ export default function HomePage() {
           <ConfirmDialog open={!!deleteTarget} title="确认删除" message={`确定要删除 "${deleteTarget}" 吗？${files.find((f) => f.name === deleteTarget)?.isFolder ? "文件夹及其所有内容将被永久删除。" : "删除后无法恢复。"}`} confirmText="删除" onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} danger />
 
           {/* Move dialogs */}
-          <MoveDialog open={!!moveTarget} itemName={moveTarget?.name || ""} currentPath={currentPath} onMove={handleMoveFile} onClose={() => setMoveTarget(null)} />
-          <MoveDialog open={batchMoveOpen} itemName={`${selectedItems.size} 个项目`} currentPath={currentPath} onMove={handleBatchMove} onClose={() => setBatchMoveOpen(false)} />
+          <MoveDialog open={!!moveTarget} itemName={moveTarget?.name || ""} currentPath={currentPath} spaceType={currentSpaceType} spaceId={currentSpaceId} onMove={handleMoveFile} onClose={() => setMoveTarget(null)} />
+          <MoveDialog open={batchMoveOpen} itemName={`${selectedItems.size} 个项目`} currentPath={currentPath} spaceType={currentSpaceType} spaceId={currentSpaceId} onMove={handleBatchMove} onClose={() => setBatchMoveOpen(false)} />
 
           {/* Batch rename dialog */}
           <BatchRenameDialog open={batchRenameOpen} files={displayFiles.filter((f) => selectedItems.has(f.name))} onRename={handleBatchRename} onClose={() => setBatchRenameOpen(false)} />

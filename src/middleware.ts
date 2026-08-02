@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/setup",
   "/api/auth",
+  "/api/config/site",
   "/_next",
   "/favicon.ico",
 ];

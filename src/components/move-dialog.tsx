@@ -14,11 +14,13 @@ interface MoveDialogProps {
   open: boolean;
   itemName: string;
   currentPath: string;
+  spaceType?: string;
+  spaceId?: string;
   onMove: (targetPath: string) => void;
   onClose: () => void;
 }
 
-export function MoveDialog({ open, itemName, currentPath, onMove, onClose }: MoveDialogProps) {
+export function MoveDialog({ open, itemName, currentPath, spaceType, spaceId, onMove, onClose }: MoveDialogProps) {
   const [selectedPath, setSelectedPath] = useState("");
   const [currentBrowsePath, setCurrentBrowsePath] = useState("");
   const [folders, setFolders] = useState<FolderItem[]>([]);
@@ -28,7 +30,10 @@ export function MoveDialog({ open, itemName, currentPath, onMove, onClose }: Mov
   const fetchFolders = useCallback(async (path: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/files/folders?path=${encodeURIComponent(path)}`);
+      const params = new URLSearchParams({ path });
+      if (spaceType) params.set("spaceType", spaceType);
+      if (spaceId) params.set("spaceId", spaceId);
+      const res = await fetch(`/api/files/folders?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
         setFolders(data.data);
@@ -37,7 +42,7 @@ export function MoveDialog({ open, itemName, currentPath, onMove, onClose }: Mov
       // ignore
     }
     setLoading(false);
-  }, []);
+  }, [spaceType, spaceId]);
 
   // 打开时重置并加载根目录
   useEffect(() => {

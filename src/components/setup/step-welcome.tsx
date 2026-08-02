@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Cloud,
@@ -43,6 +44,21 @@ interface Props {
 }
 
 export default function StepWelcome({ onNext }: Props) {
+  const [siteName, setSiteName] = useState("ChamikoFiles");
+  const [smartGradient, setSmartGradient] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/config/site")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setSiteName(d.data.name || "ChamikoFiles");
+          setSmartGradient(d.data.smartGradient ?? true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] px-4">
       {/* Logo area */}
@@ -80,7 +96,14 @@ export default function StepWelcome({ onNext }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          Chamiko<span className="gradient-text">Files</span>
+          {smartGradient ? (() => {
+            for (let i = siteName.length - 1; i >= 1; i--) {
+              if (siteName[i] >= "A" && siteName[i] <= "Z") {
+                return <>{siteName.slice(0, i)}<span className="gradient-text">{siteName.slice(i)}</span></>;
+              }
+            }
+            return <span className="gradient-text">{siteName}</span>;
+          })() : siteName}
         </motion.h1>
 
         <motion.p

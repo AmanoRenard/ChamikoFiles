@@ -41,6 +41,7 @@ export default function SettingsPage() {
   // --- Site fields ---
   const [siteName, setSiteName] = useState("");
   const [siteDesc, setSiteDesc] = useState("");
+  const [smartGradient, setSmartGradient] = useState(true);
 
   // --- Upload fields ---
   const [maxFileSizeMB, setMaxFileSizeMB] = useState("");
@@ -79,6 +80,7 @@ export default function SettingsPage() {
         // Site
         setSiteName(cfg.site?.name || "ChamikoFiles");
         setSiteDesc(cfg.site?.description || "");
+        setSmartGradient(cfg.site?.smartGradient ?? true);
         // Upload
         setMaxFileSizeMB(cfg.upload?.maxFileSize > 0 ? (cfg.upload.maxFileSize / 1048576).toFixed(0) : "");
         setMaxFilesPerBatch(String(cfg.upload?.maxFilesPerBatch ?? 50));
@@ -109,7 +111,7 @@ export default function SettingsPage() {
     return {
       storage: { path: storagePath, maxSpace: maxSpaceBytes, allowedTypes },
       quota: { defaultPersonalQuota: personalBytes, defaultSharedQuota: sharedBytes, maxSharedSpaces: maxSpaces },
-      site: { name: siteName, description: siteDesc },
+      site: { name: siteName, description: siteDesc, smartGradient },
       upload: { maxFileSize: maxFileSizeBytes, maxFilesPerBatch: batchCount },
       security: { maxLoginAttempts: attempts, lockoutMinutes: lockMins, sessionTimeoutHours: sessionHrs },
       notification: { storageAlertPercent: alertPct },
@@ -335,6 +337,25 @@ export default function SettingsPage() {
                 <div>
                   <label className="text-xs text-slate-400 mb-1.5 block">站点描述</label>
                   <input type="text" value={siteDesc} onChange={(e) => setSiteDesc(e.target.value)} placeholder="私人云盘" className={inputSmallClass} />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <span className="text-sm text-slate-200">渐变标题</span>
+                    <p className="text-xs text-slate-500 mt-0.5">站点名称显示渐变效果</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSmartGradient(!smartGradient)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${
+                      smartGradient ? "bg-primary" : "bg-white/[0.08]"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                        smartGradient ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             </motion.div>

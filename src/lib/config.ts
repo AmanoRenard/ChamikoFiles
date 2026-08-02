@@ -98,6 +98,7 @@ function getDefaultConfig(): AppConfig {
     site: {
       name: "ChamikoFiles",
       description: "私人云盘",
+      smartGradient: true,
     },
     upload: {
       maxFileSize: 524288000,      // 500 MB
@@ -151,6 +152,9 @@ export function readConfig(): AppConfig {
       site: {
         name: parsed.site?.name || defaultConfig.site.name,
         description: parsed.site?.description || defaultConfig.site.description,
+        smartGradient: parsed.site?.smartGradient !== undefined
+          ? parsed.site.smartGradient === "true" || parsed.site.smartGradient === "1"
+          : defaultConfig.site.smartGradient,
       },
       upload: {
         maxFileSize: safeInt(parsed.upload?.maxFileSize, defaultConfig.upload.maxFileSize),
@@ -190,6 +194,7 @@ export function writeConfig(config: AppConfig): void {
   data.site = {
     name: config.site.name,
     description: config.site.description,
+    smartGradient: String(config.site.smartGradient),
   };
   data.upload = {
     maxFileSize: String(config.upload.maxFileSize),

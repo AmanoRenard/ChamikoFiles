@@ -51,6 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setNeedsSetup(false);
 
+      // Skip user check on public pages — no need to 401
+      if (PUBLIC_PAGES.includes(pathname)) {
+        setLoading(false);
+        return;
+      }
+
       // Only check current user if setup is already done (not first-run)
       const meRes = await fetch("/api/auth/me");
       const meData: ApiResponse<AuthUser> = await meRes.json();

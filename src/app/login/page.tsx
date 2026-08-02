@@ -23,6 +23,10 @@ export default function LoginPage() {
   // Setup check
   const [needsSetup, setNeedsSetup] = useState<boolean | null>(null);
 
+  // Site config
+  const [siteName, setSiteName] = useState("ChamikoFiles");
+  const [smartGradient, setSmartGradient] = useState(true);
+
   // Check if this is first-run
   useEffect(() => {
     fetch("/api/auth/check-setup")
@@ -30,6 +34,15 @@ export default function LoginPage() {
       .then((d) => {
         if (d.success) setNeedsSetup(d.data.needsSetup);
       });
+    fetch("/api/config/site")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setSiteName(d.data.name || "ChamikoFiles");
+          setSmartGradient(d.data.smartGradient ?? true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Already logged in — redirect to home
@@ -106,9 +119,16 @@ export default function LoginPage() {
             <Cloud size={28} className="text-white" />
           </motion.div>
           <h1 className="text-2xl font-bold text-slate-100 mb-1.5">
-            Chamiko<span className="gradient-text">Files</span>
+            {smartGradient ? (() => {
+              for (let i = siteName.length - 1; i >= 1; i--) {
+                if (siteName[i] >= "A" && siteName[i] <= "Z") {
+                  return <>{siteName.slice(0, i)}<span className="gradient-text">{siteName.slice(i)}</span></>;
+                }
+              }
+              return <span className="gradient-text">{siteName}</span>;
+            })() : siteName}
           </h1>
-          <p className="text-sm text-slate-500">私人云盘 - 登录</p>
+          <p className="text-sm text-slate-500">登录</p>
         </div>
 
         {/* Card */}

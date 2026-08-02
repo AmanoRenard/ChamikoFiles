@@ -85,6 +85,7 @@ export async function PUT(request: NextRequest) {
     const si: Record<string, string | number> = {};
     if (typeof body.site.name === "string") si.name = body.site.name.trim();
     if (typeof body.site.description === "string") si.description = body.site.description.trim();
+    if (typeof body.site.smartGradient === "boolean") si.smartGradient = body.site.smartGradient;
     if (Object.keys(si).length > 0) partial.site = si;
   }
 

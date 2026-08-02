@@ -18,6 +18,34 @@ export function NavBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const userAreaRef = useRef<HTMLButtonElement>(null);
+  const [siteName, setSiteName] = useState("ChamikoFiles");
+  const [siteDesc, setSiteDesc] = useState("私人云盘");
+  const [smartGradient, setSmartGradient] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/config/site")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setSiteName(d.data.name || "ChamikoFiles");
+          setSiteDesc(d.data.description || "私人云盘");
+          setSmartGradient(d.data.smartGradient ?? true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  /** 智能拆分站点名称：找到最后一个大写字母位置，把后面的部分应用渐变 */
+  const splitGradientName = (name: string) => {
+    // 找到最后一个大写字母（非首字母）的位置
+    for (let i = name.length - 1; i >= 1; i--) {
+      if (name[i] >= "A" && name[i] <= "Z") {
+        return { prefix: name.slice(0, i), gradient: name.slice(i) };
+      }
+    }
+    // 找不到第二个大写字母，整体渐变
+    return { prefix: "", gradient: name };
+  };
 
   useEffect(() => {
     const fetchStorage = async () => {
@@ -56,10 +84,20 @@ export function NavBar() {
                 <Cloud size={18} className="text-white" />
               </div>
               <div>
-                <h1 className="text-base font-bold text-slate-100 tracking-tight">
-                  Chamiko<span className="gradient-text">Files</span>
-                </h1>
-                <p className="text-[10px] text-slate-500 -mt-0.5">私人云盘</p>
+                {smartGradient ? (() => {
+                  const { prefix, gradient } = splitGradientName(siteName);
+                  return (
+                    <h1 className="text-base font-bold text-slate-100 tracking-tight">
+                      {prefix}
+                      <span className="gradient-text">{gradient}</span>
+                    </h1>
+                  );
+                })() : (
+                  <h1 className="text-base font-bold text-slate-100 tracking-tight">
+                    {siteName}
+                  </h1>
+                )}
+                <p className="text-[10px] text-slate-500 -mt-0.5">{siteDesc}</p>
               </div>
             </Link>
 
